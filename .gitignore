@@ -1,0 +1,15 @@
+# === SCAN OUTPUTS ===
+nmap-scans/
+*.xml
+*.gnmap
+*.txt
+
+# === EDITOR / OS JUNK ===
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# === ENV / SECRETS ===
+.env
+*.env
