@@ -87,7 +87,7 @@ Temporary grepable output is created during the run and moved/removed safely; no
 
 safe_target is a sanitized version of the input target for safe filenames (non-ASCII and special characters replaced).
 
-## S## Safety & legal (important)
+## Safety & legal (important)
 
 **Only run scans against systems you own or have explicit written permission to test.**
 Unauthorized scanning can be illegal, violate Terms of Service, and may cause disruption.
