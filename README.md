@@ -13,6 +13,7 @@ Small, safe and reproducible workflow for local labs and authorised testing.
 - Runs a **targeted detailed scan** (`-sC -sV and more`) on discovered ports.
 - Lists all scanned ports.
 - Appends a **top-100 UDP** scan.
+- Optionally skip UDP scan with --no-udp.
 - Saves the final human-readable report to `./nmap-scans/` by default (override with `NMAP_OUTDIR`).
 
 This repo contains the function as a file you can `source` into your `~/.zshrc`.
