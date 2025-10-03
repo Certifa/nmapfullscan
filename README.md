@@ -71,6 +71,8 @@ source ~/.zshrc
 
 Or open ~/.zshrc and paste:
 <All the code in the file>
+# then reload:
+source ~/.zshrc
 
 Test locally
 nmapfullscan 127.0.0.1
