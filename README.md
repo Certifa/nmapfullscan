@@ -65,7 +65,7 @@ nmapfullscan/
 ```bash
 git clone https://github.com/Certifa/nmapfullscan.git
 cd nmapfullscan
-echo "source $(pwd)/nmapfullscan.zsh" >> ~/.zshrc
+echo "source (pwd)/nmapfullscan.zsh" >> ~/.zshrc #Use your full path, otherwise it can glitch.
 # then reload:
 source ~/.zshrc
 
