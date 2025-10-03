@@ -41,8 +41,13 @@ nmapfullscan() {
     done | tee "$outfile"
   fi
 
+if ! $skip_udp; then
   echo -e "\e[34m🌊 Step 3: UDP-scan on top 100 ports...\e[0m"
   sudo nmap -sU --top-ports 100 "$target" | tee -a "$outfile"
+else
+  echo -e "\e[33m⚠️ Skipping UDP scan (--no-udp specified)\e[0m"
+fi
+
 
   echo -e "\e[32m📄 All results are saved in: \e[1m${outfile}\e[0m"
   trap - EXIT
