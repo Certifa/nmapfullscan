@@ -1,9 +1,22 @@
 nmapfullscan() {
-  if [[ -z "$1" ]]; then
-    echo -e "\e[31m❌ Use: nmapfullscan <IP or hostname>\e[0m"; return 1
+  local skip_udp=false
+  local args=()
+
+  for arg in "$@"; do
+    case "$arg" in
+      --no-udp) skip_udp=true ;;
+      *) args+=("$arg") ;;
+    esac
+  done
+  set -- "${args[@]}"
+
+  if [[ $# -lt 1 ]]; then
+    echo -e "\e[31m❌ Use: nmapfullscan <IP or hostname> [--no-udp]\e[0m"
+    return 1
   fi
 
   local target=$1
+
   local outdir="${NMAP_OUTDIR:-./nmap-scans}"
   mkdir -p "$outdir"
 
