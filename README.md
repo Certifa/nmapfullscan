@@ -63,7 +63,7 @@ nmapfullscan/
 1. Clone the repo:
 
 ```bash
-git clone https://github.com/<youruser>/nmapfullscan.git
+git clone https://github.com/Certifa/nmapfullscan.git
 cd nmapfullscan
 echo "source $(pwd)/scripts/nmapfullscan.zsh" >> ~/.zshrc
 # then reload:
