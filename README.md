@@ -70,7 +70,7 @@ echo "source $(pwd)/scripts/nmapfullscan.zsh" >> ~/.zshrc
 source ~/.zshrc
 
 Or open ~/.zshrc and paste:
-source /full/path/to/nmapfullscan/scripts/nmapfullscan.zsh
+<All the code in the file>
 
 Test locally
 nmapfullscan 127.0.0.1
