@@ -1,21 +1,18 @@
 # nmapfullscan
 
-Zsh helper function to run quick → targeted Nmap scans and save results.
-Small, safe and reproducible workflow for local labs and authorised testing.
+A lightweight Python tool to run quick and targeted Nmap scans and save results. Small, safe, and reproducible workflow for local labs and authorized testing.
 
 ---
 
-## Summary
+## Overview
 
-`nmapfullscan` is a tiny zsh helper that:
+`nmapfullscan.py`:
 
-- Runs a **quick TCP sweep** (grepable) to discover open ports.
-- Runs a **targeted detailed scan** (`-sC -sV and more`) on discovered ports.
+- Runs a **quick TCP sweep** (grepable output) to discover open ports.
+- Runs a **targeted detailed scan** (`-sC -sV` and additional options) on discovered ports.
 - Lists all scanned ports.
 - Appends a **top-100 UDP** scan.
-- Saves the final human-readable report to `./nmap-scans/` by default (override with `NMAP_OUTDIR`).
-
-This repo contains the function as a file you can `source` into your `~/.zshrc`.
+- Saves the final human-readable report to `./nmap-scans/` by default (can override with `--output-dir`).
 
 ---
 
@@ -23,84 +20,77 @@ This repo contains the function as a file you can `source` into your `~/.zshrc`.
 
 Flow:
 
-Quick TCP sweep (nmap -T4 --min-rate=1000 -p- -n -v -oG -) to find open ports.
+- Quick TCP sweep (nmap -T4 --min-rate=1000 -p- -n -v -oG -) to find open ports
+- Parse open ports from grepable output
+- If open ports exist → nmap -sC -sV -p<ports> saved to the final text file (and XML if configured)
+- Append nmap -sU --top-ports 100 to the same text file
 
-Parse open ports from grepable output.
-
-If open ports exist → nmap -sC -sV -p<ports> saved to the final text file (and XML if configured).
-
-Append nmap -sU --top-ports 100 to the same text file.
+---
 
 ## Example
 
 ![Example scan](docs/nmap_scan.jpg)
 
-## Files in this repo
+---
 
-```
-nmapfullscan/
-├─ scripts/
-│ └─ nmapfullscan.zsh # the function (source this file in your zsh)
-├─ README.md # you are reading it
-└─ .gitignore # recommended ignore rules
-```
+## Files in this repo
+**nmapfullscan/**
+- ├─ nmapfullscan.py # the main Python tool
+- ├─ README.md # you are reading it
+- └─ .gitignore # recommended ignore rules
 
 ---
 
 ## Prerequisites
 
-- `zsh` (interactive shell) — function is intended to be `sourced`.
-- `nmap` installed and in PATH (sudo required for some scans).
+- Python 3.8+ installed and available on your command line
+- Nmap installed and in PATH (sudo required for some scans)
   - Linux: `sudo apt install nmap` or `sudo pacman -S nmap`
   - macOS: `brew install nmap`
-- Basic familiarity with running commands and editing `~/.zshrc`.
+- Python modules: `colorama`, `requests` (install via `pip install colorama requests`)
 
 ---
 
 ## Install (quick)
 
-1. Clone the repo:
-
-```bash
-git clone https://github.com/<youruser>/nmapfullscan.git
+1. Clone this repo:
+git clone https://github.com/Certifa/nmapfullscan.git
+2. Install the `requirements` with
+- `pip install -r requirements.txt`
 cd nmapfullscan
-echo "source $(pwd)/scripts/nmapfullscan.zsh" >> ~/.zshrc
-# then reload:
+3. Optionally, create an alias for easier use: alias nmapfullscan='python3 /full/path/to/nmapfullscan.py'
+4. Reload your shell or `.zshrc`:
 source ~/.zshrc
 
-Or open ~/.zshrc and paste:
-source /full/path/to/nmapfullscan/scripts/nmapfullscan.zsh
+---
 
-Test locally
-nmapfullscan 127.0.0.1
-```
+## Usage
 
-## Output & file naming
+nmapfullscan <IP or hostname> [--no-udp] [--output-dir <directory>]
 
-By default the function writes to the directory where **you** invoked it (or NMAP_OUTDIR):
+Reactivate your regular scanning workflow, with enhanced readability and quick results saving.
 
-nmap*<safe_target>*<YYYYmmdd_HHMMSS>.txt — final human-readable report (detailed TCP + UDP appended).
+---
 
-When NMAP*SAVE_XML=1, nmap*<safe*target>*<ts>.xml — machine-readable XML for parsers.
+## Safety & legal (important)
 
-Temporary grepable output is created during the run and moved/removed safely; no leftover temp files.
+Only run scans against systems you own or have explicit written permission to test. Unauthorized scanning is illegal and may cause disruption.
 
-safe_target is a sanitized version of the input target for safe filenames (non-ASCII and special characters replaced).
+By using `nmapfullscan`, you agree to the following responsibilities:
 
-## S## Safety & legal (important)
+- Obtain explicit, written authorization before scanning third-party systems.
+- Respect any scope, time-window, and usage limits in the authorization.
+- Use reasonable timing/rate limits and avoid aggressive scans on production systems.
+- Do **not** share or publish scan outputs or sensitive information.
+- Follow responsible disclosure processes if vulnerabilities are found.
+- The author is not liable for misuse.
 
-**Only run scans against systems you own or have explicit written permission to test.**
-Unauthorized scanning can be illegal, violate Terms of Service, and may cause disruption.
+---
 
-By using `nmapfullscan` you agree to the following responsibilities:
+## Contributions and feedback
 
-- **Permission:** Obtain explicit, written authorization before scanning third-party systems (customers, employers, CTF/HTB machines unless the platform explicitly allows sharing, etc.).
-- **Scope & rules:** Respect any scope, time-window, and usage limits in the authorization. For CTF platforms (HackTheBox, etc.) follow their rules and avoid publishing identifiable targets or spoilers.
-- **Minimize impact:** Use reasonable timing/rate limits on production systems; do not perform aggressive scans without coordination. Consider `--host-timeout`, `--max-retries`, or lower `-T` values in sensitive environments.
-- **Data handling:** Do **not** commit or publish scan outputs, target lists, credentials, or any sensitive artifacts. Use `.gitignore` to exclude `nmap-scans/` and similar files.
-- **Responsible disclosure:** If you discover a vulnerability on a third-party system, follow a responsible disclosure process — contact the owner/provider and avoid public disclosure until it’s fixed or permitted.
-- **Legal compliance:** You are responsible for complying with applicable laws and organizational policies. The repository author is not liable for misuse.
+Fork, open issues, or pull requests are welcome via GitHub.
 
-If you want to include a short acknowledgement line in your repo:
+---
 
 > **Disclaimer:** This tool is provided for educational and authorized testing only. The author accepts no liability for misuse.
