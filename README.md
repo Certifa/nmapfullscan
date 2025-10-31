@@ -57,10 +57,8 @@ Flow:
 git clone https://github.com/Certifa/nmapfullscan.git
 2. Install the `requirements` with
 - `pip install -r requirements.txt`
-cd nmapfullscan
 3. Optionally, create an alias for easier use: alias nmapfullscan='python3 /full/path/to/nmapfullscan.py'
-4. Reload your shell or `.zshrc`:
-source ~/.zshrc
+4. Reload your shell
 
 ---
 
