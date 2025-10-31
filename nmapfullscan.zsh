@@ -1,9 +1,22 @@
 nmapfullscan() {
-  if [[ -z "$1" ]]; then
-    echo -e "\e[31m❌ Use: nmapfullscan <IP or hostname>\e[0m"; return 1
+  local skip_udp=false
+  local args=()
+
+  for arg in "$@"; do
+    case "$arg" in
+      --no-udp) skip_udp=true ;;
+      *) args+=("$arg") ;;
+    esac
+  done
+  set -- "${args[@]}"
+
+  if [[ $# -lt 1 ]]; then
+    echo -e "\e[31m❌ Use: nmapfullscan <IP or hostname> [--no-udp]\e[0m"
+    return 1
   fi
 
   local target=$1
+
   local outdir="${NMAP_OUTDIR:-./nmap-scans}"
   mkdir -p "$outdir"
 
@@ -16,33 +29,33 @@ nmapfullscan() {
   trap '[[ -f "$temp" ]] && rm -f "$temp"' EXIT
 
   echo -e "\e[34m🔍 Step 1: Quick TCP-scan...\e[0m"
-  sudo nmap -T4 --min-rate=1000 -p- -n -v "$target" -oG - | tee "$temp"
+  sudo nmap -T4 --min-rate=1000 -p- -n -v "$target" -oG - 2>&1 | tee "$temp" | while IFS= read -r line; do
+    if [[ "$line" =~ open ]]; then
+      echo -e "\e[32m${line}\e[0m"
+    elif [[ "$line" =~ closed|filtered ]]; then
+      echo -e "\e[31m${line}\e[0m"
+    else
+      echo "$line"
+    fi
+  done | tee "$outfile"
 
+  # Extract open ports
   local openports
-  openports=$(grep -oP '\d+/open' "$temp" | cut -d'/' -f1 | tr '\n' ',' | sed 's/,$//')
+  openports=$(grep -oP '^\d+(?=/tcp\s+open)' "$temp" | tr '\n' ',' | sed 's/,$//')
 
-  if [[ -z "$openports" ]]; then
-    echo -e "\e[31m⚠️ No open TCP-ports are found on ${target}.\e[0m"
+  if [[ -n "$openports" ]]; then
+    echo -e "\e[34m🔎 Step 2: Detailed scan op open ports...\e[0m"
+    sudo nmap -sV -sC -p "$openports" "$target" | tee -a "$outfile"
   else
-    echo -e "\e[32m✅ Found open TCP-ports: \e[33m${openports}\e[0m"
-    echo -e "\e[34m🔬 Step 2: Detailed TCP-scan...\e[0m"
-
-    local scan_output
-    scan_output=$(sudo nmap -sC -sV -p"$openports" "$target")
-
-    echo "$scan_output" | while IFS= read -r line; do
-      if [[ "$line" =~ ^[0-9]+/tcp[[:space:]]+open ]]; then
-        echo -e "\e[32m${line}\e[0m"
-      elif [[ "$line" =~ ^[0-9]+/tcp[[:space:]]+closed ]]; then
-        echo -e "\e[31m${line}\e[0m"
-      else
-        echo "$line"
-      fi
-    done | tee "$outfile"
+    echo -e "\e[33m⚠️ Geen open TCP ports gevonden\e[0m"
   fi
 
-  echo -e "\e[34m🌊 Step 3: UDP-scan on top 100 ports...\e[0m"
-  sudo nmap -sU --top-ports 100 "$target" | tee -a "$outfile"
+  if ! $skip_udp; then
+    echo -e "\e[34m🌊 Step 3: UDP-scan op top 100 ports...\e[0m"
+    sudo nmap -sU --top-ports 100 "$target" | tee -a "$outfile"
+  else
+    echo -e "\e[33m⚠️ Skipping UDP scan (--no-udp specified)\e[0m"
+  fi
 
   echo -e "\e[32m📄 All results are saved in: \e[1m${outfile}\e[0m"
   trap - EXIT
