@@ -1,29 +1,32 @@
 # nmapfullscan
 
-A lightweight Python tool to run quick and targeted Nmap scans and save results. Small, safe, and reproducible workflow for local labs and authorized testing.
+A lightweight Python tool for fast and reliable Nmap scans with enhanced readability and safe results saving. Perfect for local labs and authorized testing environments.
 
 ---
 
 ## Overview
 
-`nmapfullscan.py`:
+`nmapfullscan.py` runs a two-step TCP scan workflow with colorized console output and added UDP scanning:
 
-- Runs a **quick TCP sweep** (grepable output) to discover open ports.
-- Runs a **targeted detailed scan** (`-sC -sV` and additional options) on discovered ports.
-- Lists all scanned ports.
-- Appends a **top-100 UDP** scan.
-- Saves the final human-readable report to `./nmap-scans/` by default (can override with `--output-dir`).
+- **Step 1:** Quick TCP port sweep using `-sS` (SYN scan) on all ports with controlled timing parameters for a balance of speed and accuracy. Outputs grepable and XML files.
+- **Step 2:** Targeted detailed scan (`-sC -sV`) on only the discovered open TCP ports for service/version detection.
+- **Step 3:** Optional UDP top-100 port scan appended to results.
+- All results are saved in timestamped files in `./nmap-scans/` by default, including human-readable text with color highlights and XML for machine parsing.
+- Configurable scan speed profiles (`safe`, `balanced`, `fast`) allow control over timing aggressiveness and retries for more reliable detections.
 
 ---
 
-## Behaviour & internals (concise)
+## Usage
 
 Flow:
 
-- Quick TCP sweep (nmap -T4 --min-rate=1000 -p- -n -v -oG -) to find open ports
+- Quick TCP sweep (`nmap -T4 --min-rate=1000 -p- -n -v -oG -`) to find open ports
 - Parse open ports from grepable output
-- If open ports exist → nmap -sC -sV -p<ports> saved to the final text file (and XML if configured)
-- Append nmap -sU --top-ports 100 to the same text file
+- If open ports exist → `nmap -sC -sV -p<ports>` saved to the final text file (and XML if configured)
+- Append `nmap -sU --top-ports 100` to the same text file
+
+`python3 nmapfullscan.py <IP or hostname> [--no-udp] [--output-dir <directory>] [--profile safe|balanced|fast]`
+
 
 ---
 
@@ -41,55 +44,54 @@ Flow:
 
 ---
 
-## Prerequisites
+## Key Improvements in This Version
 
-- Python 3.8+ installed and available on your command line
-- Nmap installed and in PATH (sudo required for some scans)
-  - Linux: `sudo apt install nmap` or `sudo pacman -S nmap`
-  - macOS: `brew install nmap`
-- Python modules: `colorama`, `requests` (install via `pip install colorama requests`)
+- Robust parsing of open ports strictly from Nmap's grepable output `Host: ... Ports:` line.
+- Avoids brittle regex on free text output which caused missed detections.
+- Simultaneously outputs XML files to retain full machine-readable scan data.
+- Reduced overly aggressive default timing settings to minimize missed open ports.
+- Maintains original colorful and categorized console output for easy reading.
+- Modular UDP scanning with option to skip.
+
+---
+
+## Requirements
+
+- Python 3.8+
+- `colorama` Python package (for terminal colors)
+- Nmap installed and accessible in your system PATH
 
 ---
 
 ## Install (quick)
 
 1. Clone this repo:
-git clone https://github.com/Certifa/nmapfullscan.git
-2. Install the `requirements` with
-- `pip install -r requirements.txt`
-cd nmapfullscan
-3. Optionally, create an alias for easier use: alias nmapfullscan='python3 /full/path/to/nmapfullscan.py'
+   `git clone https://github.com/Certifa/nmapfullscan.git`
+2. Install the requirements with:
+   `pip install -r requirements.txt`
+   `cd nmapfullscan`
+3. Optionally, create an alias for easier use:
+   `alias nmapfullscan='python3 /full/path/to/nmapfullscan.py'`
 4. Reload your shell or `.zshrc`:
-source ~/.zshrc
+   `source ~/.zshrc`
 
 ---
 
-## Usage
+### Safety Note
 
-nmapfullscan <IP or hostname> [--no-udp] [--output-dir <directory>]
-
-Reactivate your regular scanning workflow, with enhanced readability and quick results saving.
+Only scan systems you have explicit permission to test. Unauthorized scanning is illegal and can cause harm.
 
 ---
 
-## Safety & legal (important)
+## Legal Disclaimer
 
-Only run scans against systems you own or have explicit written permission to test. Unauthorized scanning is illegal and may cause disruption.
-
-By using `nmapfullscan`, you agree to the following responsibilities:
-
-- Obtain explicit, written authorization before scanning third-party systems.
-- Respect any scope, time-window, and usage limits in the authorization.
-- Use reasonable timing/rate limits and avoid aggressive scans on production systems.
-- Do **not** share or publish scan outputs or sensitive information.
-- Follow responsible disclosure processes if vulnerabilities are found.
-- The author is not liable for misuse.
+Use this tool responsibly. The author is not liable for misuse.
 
 ---
 
-## Contributions and feedback
+## Contribution
 
-Fork, open issues, or pull requests are welcome via GitHub.
+Feel free to fork, raise issues, or submit pull requests on GitHub.
 
 ---
 
