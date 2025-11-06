@@ -71,12 +71,21 @@ def main():
     )
     args = parser.parse_args()
 
+    # Timing presets Nmap docs:
+    # - balanced: T4 with min-rate 1000 and max-retries 2
+    # - fast: more agressive for HTB; risk for possible misses
     if args.profile == "safe":
-        tcp_timing = ["-T3", "--min-rate", "200", "--max-retries", "3"]
+        tcp_timing = ["-T3", "--min-rate", "300", "--max-retries", "3"]  # normal paced
     elif args.profile == "fast":
-        tcp_timing = ["-T4", "--min-rate", "700", "--max-retries", "1"]
+        tcp_timing = ["-T4", "--min-rate", "5000", "--max-retries", "1"]  # fast
     else:
-        tcp_timing = ["-T3", "--min-rate", "400", "--max-retries", "2"]
+        tcp_timing = [
+            "-T4",
+            "--min-rate",
+            "1000",
+            "--max-retries",
+            "2",
+        ]  # balanced default
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_target = "".join(
@@ -90,6 +99,7 @@ def main():
     outfile_xml_udp = outdir / f"nmap_{safe_target}_{ts}_udp.xml"
 
     print(f"{Fore.BLUE}🔍 Step 1: Quick TCP-scan...{Style.RESET_ALL}")
+    # -n to skip DNS
     quick_cmd = (
         ["sudo", "nmap", "-sS", "-n", "-p-", "-v"]
         + tcp_timing
@@ -122,7 +132,7 @@ def main():
     open_ports = parse_open_tcp_ports_from_grepable(quickscan.stdout)
     ports_str = ",".join(open_ports)
 
-    # Step 2: detailscan open TCP
+    # Step 2: Detailscan on open TCP
     if open_ports:
         print(
             f"{Fore.BLUE}🔎 Step 2: Detailed scan op open TCP-poorten: {Fore.YELLOW}{ports_str}{Style.RESET_ALL}"
@@ -131,11 +141,13 @@ def main():
             "sudo",
             "nmap",
             "-sV",
+            "--version-intensity",
+            "2",
             "-sC",
             "-n",
             "-p",
             ports_str,
-            "-T3",
+            "-T4",
             "-oX",
             str(outfile_xml_detail),
             args.target,
@@ -153,6 +165,7 @@ def main():
     else:
         print(Fore.YELLOW + "⚠️ Geen open TCP ports gevonden" + Style.RESET_ALL)
 
+    # Step 3: UDP
     if not args.no_udp:
         print(f"{Fore.BLUE}🌊 Step 3: UDP-scan op top 100 ports...{Style.RESET_ALL}")
         udp_cmd = [
@@ -162,8 +175,12 @@ def main():
             "--top-ports",
             "100",
             "-sV",
+            "--version-intensity",
+            "2",
             "-n",
-            "-T3",
+            "-T4",
+            "--max-retries",
+            "1",
             "-oX",
             str(outfile_xml_udp),
             args.target,
