@@ -135,7 +135,7 @@ def main():
     # Step 2: Detailscan on open TCP
     if open_ports:
         print(
-            f"{Fore.BLUE}🔎 Step 2: Detailed scan op open TCP-poorten: {Fore.YELLOW}{ports_str}{Style.RESET_ALL}"
+            f"{Fore.BLUE}🔎 Step 2: Detailed scan on open TCP-ports: {Fore.YELLOW}{ports_str}{Style.RESET_ALL}"
         )
         detail_cmd = [
             "sudo",
@@ -163,11 +163,11 @@ def main():
                     print(line)
                 outfh.write(line + "\n")
     else:
-        print(Fore.YELLOW + "⚠️ Geen open TCP ports gevonden" + Style.RESET_ALL)
+        print(Fore.YELLOW + "⚠️ No open TCP ports found" + Style.RESET_ALL)
 
     # Step 3: UDP
     if not args.no_udp:
-        print(f"{Fore.BLUE}🌊 Step 3: UDP-scan op top 100 ports...{Style.RESET_ALL}")
+        print(f"{Fore.BLUE}🌊 Step 3: UDP-scan on top 100 ports...{Style.RESET_ALL}")
         udp_cmd = [
             "sudo",
             "nmap",
